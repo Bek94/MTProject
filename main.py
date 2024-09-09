@@ -1,73 +1,76 @@
 import RPi.GPIO as GPIO
 import time
+import sys
+import subprocess
 
-# GPIO setup
+# GPIO Setup
 GPIO.setmode(GPIO.BCM)
 
-# Define pins for sensors and LEDs
-sensor_pins = {
-    'A': 5,  # Herzschrittmacher-Sensor
-    'B': 6,  # Knieprothese-Sensor
-    'C': 13, # Cochlea-Implantat-Sensor
-    'D': 19  # Handprothese-Sensor
-}
-
+# Definieren der LED- und Sensor-Pins
 led_pins = {
-    'red': 17,  # LED für richtige Antwort
-    'green': 27,
-    'yellow': 22,
-    'white': 23
+    'pacemaker': 17,
+    'knee': 27,
+    'elbow': 22,
+    'shoulder': 23
 }
 
-GPIO.setup(list(sensor_pins.values()), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+sensor_pins = {
+    'pacemaker': 5,
+    'knee': 6,
+    'elbow': 13,
+    'shoulder': 19
+}
+
 GPIO.setup(list(led_pins.values()), GPIO.OUT)
+GPIO.setup(list(sensor_pins.values()), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-correct_answer = 'A'
-
+# Funktion zum Zurücksetzen der LEDs
 def reset_leds():
-    for led in led_pins.values():
-        GPIO.output(led, GPIO.LOW)
+    for pin in led_pins.values():
+        GPIO.output(pin, GPIO.LOW)
 
-def light_led(led_color):
+# Funktion zum Aktivieren einer korrekten LED
+def light_correct_led(implant):
     reset_leds()
-    GPIO.output(led_pins[led_color], GPIO.HIGH)
+    GPIO.output(led_pins[implant], GPIO.HIGH)
+    time.sleep(10)
+    reset_leds()
 
-def check_answer(channel):
-    selected_answer = None
-
-    for key, pin in sensor_pins.items():
-        if pin == channel:
-            selected_answer = key
-
-    if selected_answer:
-        if selected_answer == correct_answer:
-            print("Richtig, die richtige Antwort ist Herzschrittmacher.")
-            light_led('red')  # Rote LED für richtige Antwort
-            time.sleep(5)
-        else:
-            print("Falsch, die richtige Antwort ist Herzschrittmacher.")
-            blink_all_leds()
-            time.sleep(3)
-
+# Funktion zum Blinken aller LEDs bei falscher Antwort
 def blink_all_leds():
-    for _ in range(3):
-        for led in led_pins.values():
-            GPIO.output(led, GPIO.HIGH)
+    for _ in range(2):
+        for pin in led_pins.values():
+            GPIO.output(pin, GPIO.HIGH)
         time.sleep(0.5)
         reset_leds()
         time.sleep(0.5)
 
-if __name__ == '__main__':
-    # Add event detection for each sensor
-    for pin in sensor_pins.values():
-        GPIO.add_event_detect(pin, GPIO.RISING, callback=check_answer, bouncetime=300)
+# Überwache Sensoren für den "Mehrinformationsmodus"
+def check_sensor_input():
+    while True:
+        for implant, pin in sensor_pins.items():
+            if GPIO.input(pin) == GPIO.HIGH:
+                # Sensor-Interaktion erkannt, sende das Implantat an die GUI
+                print(implant)
+                time.sleep(1)  # Verhindert Mehrfachauslösungen
+        time.sleep(0.1)
 
+if __name__ == '__main__':
     try:
-        print("Warten auf Benutzereingabe...")
-        while True:
-            time.sleep(0.1)  # Hauptloop zum Abfragen der Sensoren
+        mode = sys.argv[1]  # 'quiz' oder 'info'
+        
+        if mode == 'quiz':
+            result = sys.argv[2]  # 'correct' oder 'incorrect'
+            implant = sys.argv[3] if result == 'correct' else None
+            
+            if result == "correct" and implant in led_pins:
+                light_correct_led(implant)
+            elif result == "incorrect":
+                blink_all_leds()
+        elif mode == 'info':
+            check_sensor_input()
 
     except KeyboardInterrupt:
-        print("Beende Programm...")
+        print("Programm beendet.")
     finally:
         GPIO.cleanup()
