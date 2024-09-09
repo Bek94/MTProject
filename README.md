@@ -1,62 +1,47 @@
 # MTProject
-# Interaktiver Quiz-Test mit Raspberry Pi und Sensoren
+# Implantat-Quiz- und Informationssystem
 
-Dieses Projekt implementiert einen interaktiven Quiz-Test, bei dem Benutzer über Sensoren eines Ersatzteilmenschen antworten können. Die Rückmeldung erfolgt sowohl über LEDs als auch auf einem Tablet, das die Frage anzeigt.
+Dieses Projekt bietet eine interaktive Plattform für Quizfragen und Informationsanzeigen über medizinische Implantate. Es kombiniert einen Quizmodus mit einem Mehrinformationsmodus, der es dem Benutzer ermöglicht, durch Sensorberührungen detaillierte Informationen abzurufen.
 
 ## Voraussetzungen
 
-1. **Hardware**:
-    - Raspberry Pi 4/5
-    - 4 LEDs (rot, grün, gelb, weiß)
-    - 4 Taster oder Sensoren zur Simulation der physischen Interaktion
-    - Verbindungsdrähte und Widerstände
-    - Steckbrett
-
-2. **Software**:
-    - Raspberry Pi OS (mit installiertem `gpiozero` und `RPi.GPIO`)
-    - Python 3
-    - Qt Design Studio
-
-## Hardware-Aufbau
-
-Verbinde die LEDs und Taster mit den GPIO-Pins des Raspberry Pi wie folgt:
-
-- Rote LED an GPIO 17
-- Grüne LED an GPIO 27
-- Gelbe LED an GPIO 22
-- Weiße LED an GPIO 23
-
-- Herzschrittmacher-Sensor (Taster) an GPIO 5
-- Knieprothese-Sensor (Taster) an GPIO 6
-- Cochlea-Implantat-Sensor (Taster) an GPIO 13
-- Handprothese-Sensor (Taster) an GPIO 19
+- Raspberry Pi 4/5
+- LEDs und Sensoren für Herzschrittmacher, Knieprothese, Ellenbogenprothese und Schulterprothese
+- Python 3
+- Qt Design Studio
 
 ## Installation
 
-1. **Clone das Repository**:
+1. **Klonen des Repositories**:
     ```
-    git clone <your-github-repo-url>
-    cd quiz-app
-    ```
-
-2. **Installiere benötigte Python-Bibliotheken**:
-    ```
-    pip install RPi.GPIO
+    git clone <your-github-repo-link>
+    cd implant-quiz-info-app
     ```
 
-3. **Führe das Hauptprogramm aus**:
+2. **Installieren der Abhängigkeiten**:
     ```
-    sudo python3 main.py
+    pip install -r requirements.txt
     ```
 
-4. **Starte die GUI (optional)**:
-    Öffne das Projekt in Qt Design Studio und führe die QML-Datei aus.
+3. **Verbinden der Sensoren und LEDs**:
+    - Herzschrittmacher: GPIO 5 (Sensor), GPIO 17 (LED)
+    - Knieprothese: GPIO 6 (Sensor), GPIO 27 (LED)
+    - Ellenbogenprothese: GPIO 13 (Sensor), GPIO 22 (LED)
+    - Schulterprothese: GPIO 19 (Sensor), GPIO 23 (LED)
+
+4. **Starten der Anwendung**:
+    - Führe das Hauptskript aus:
+      ```
+      sudo python3 main.py <mode> <result> <implant>
+      ```
+
+    - Öffne das Qt-Projekt und starte die `implant_interface.qml` Datei.
 
 ## Verwendung
 
-- Der Benutzer kann entweder durch Drücken eines Sensors auf dem Ersatzteilmenschen oder durch Auswahl auf dem Tablet antworten.
-- Bei richtiger Antwort leuchtet die rote LED für 10 Sekunden.
-- Bei falscher Antwort blinken alle LEDs für 3 Sekunden.
+- Wähle im UI zwischen dem Quiz- und Informationsmodus.
+- Im Quiz-Modus gibt es visuelles Feedback (LEDs) bei richtigen/falschen Antworten.
+- Im Mehrinformationsmodus werden durch Sensorberührungen detaillierte Informationen angezeigt.
 
 ## Lizenz
 
