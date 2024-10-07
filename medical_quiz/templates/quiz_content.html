@@ -1,0 +1,22 @@
+<h1>Quiz - {{ questions[0]['body_part'] }}</h1>
+
+{% for question in questions %}
+<div class="question-block" id="question-block-{{ question['id'] }}">
+    <p class="question-text">{{ question['id'] }}. {{ question['question'] }}</p>
+    <div class="options">
+        <label>
+            <input type="radio" name="option-{{ question['id'] }}" value="A" onclick="submitAnswer({{ question['id'] }}, 'A')"> A. {{ question['option_a'] }}
+        </label>
+        <label>
+            <input type="radio" name="option-{{ question['id'] }}" value="B" onclick="submitAnswer({{ question['id'] }}, 'B')"> B. {{ question['option_b'] }}
+        </label>
+        <label>
+            <input type="radio" name="option-{{ question['id'] }}" value="C" onclick="submitAnswer({{ question['id'] }}, 'C')"> C. {{ question['option_c'] }}
+        </label>
+        <label>
+            <input type="radio" name="option-{{ question['id'] }}" value="D" onclick="submitAnswer({{ question['id'] }}, 'D')"> D. {{ question['option_d'] }}
+        </label>
+    </div>
+    <div class="message" id="message-{{ question['id'] }}"></div>
+</div>
+{% endfor %}

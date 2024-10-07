@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mode Selection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<header>
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+</header>
+
+<div class="mode-selection-container">
+    <h1>Select Mode</h1>
+    <a href="{{ url_for('set_mode', mode='information') }}" class="mode-button">Information</a>
+    <a href="{{ url_for('set_mode', mode='quiz') }}" class="mode-button">Quiz</a>
+</div>
+
+</body>
+</html>

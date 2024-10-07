@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block left_panel %}
+<div class="skeleton-image">
+    <!-- Include body part buttons with onclick events for Information Mode -->
+    {% if mode == 'information' %}
+    <img src="{{ url_for('static', filename='images/skeleton.png') }}" alt="Human Skeleton" style="width: 100%; height: 100%;">
+    <button class="body-button" style="top: 20%; left: 45%;" onclick="selectBodyPart('Heart')">Heart</button>
+    <!-- Add buttons for other body parts -->
+    <button class="body-button" style="top: 15%; left: 45%;" onclick="selectBodyPart('Ear')">Ear</button>
+    <button class="body-button" style="top: 35%; left: 50%;" onclick="selectBodyPart('Shoulder')">Shoulder</button>
+    <button class="body-button" style="top: 45%; left: 50%;" onclick="selectBodyPart('Elbow')">Elbow</button>
+    <button class="body-button" style="top: 60%; left: 50%;" onclick="selectBodyPart('Hip')">Hip</button>
+    <button class="body-button" style="top: 70%; left: 50%;" onclick="selectBodyPart('Knee')">Knee</button>
+    <button class="body-button" style="top: 85%; left: 50%;" onclick="selectBodyPart('Foot')">Foot</button>
+    <button class="body-button" style="top: 30%; left: 55%;" onclick="selectBodyPart('Arm')">Arm</button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block right_panel %}
+<div id="content-area">
+    {% if mode == 'information' %}
+    <h2>Please select a body part.</h2>
+    {% elif mode == 'quiz' %}
+    <h2>Loading Quiz...</h2>
+    {% else %}
+    <h2>No mode selected.</h2>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentQuestion = null;
+
+function selectBodyPart(bodyPart) {
+    fetch('/get_content/' + bodyPart)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('content-area').innerHTML = '<p>' + data.error + '</p>';
+        } else {
+            document.getElementById('content-area').innerHTML = data.content;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function loadCurrentQuestion() {
+    fetch('/get_current_question')
+    .then(response => response.json())
+    .then(data => {
+        if (data.question) {
+            currentQuestion = data.question;
+            document.getElementById('content-area').innerHTML = renderQuestion(currentQuestion);
+        } else {
+            document.getElementById('content-area').innerHTML = '<p>' + data.message + '</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function renderQuestion(question) {
+    return `
+        <h2>Question ${question.id}</h2>
+        <p>${question.question}</p>
+        <ul>
+            <li>A. ${question.option_a}</li>
+            <li>B. ${question.option_b}</li>
+            <li>C. ${question.option_c}</li>
+            <li>D. ${question.option_d}</li>
+            <li>(Select your answer using the physical buttons)</li>
+        </ul>
+        <div id="message"></div>
+    `;
+}
+
+// Function to periodically check for updates
+function pollForUpdates() {
+    setInterval(() => {
+        loadCurrentQuestion();
+    }, 5000); // Adjust the interval as needed (e.g., every 5 seconds)
+}
+
+// Load the first question when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if ('{{ mode }}' === 'quiz') {
+        loadCurrentQuestion();
+        pollForUpdates();
+    }
+});
+
+</script>
+{% endblock %}
