@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block left_panel %}
+<div class="skeleton-image">
+    <img src="{{ url_for('static', filename='images/skeleton.png') }}" alt="Human Skeleton" style="width: 100%; height: 100%;">
+    <!-- Include body part buttons with onclick events -->
+    <button class="body-button" style="top: 30%; left: 50%;" onclick="selectBodyPart('Heart')">Heart</button>
+    <button class="body-button" style="top: 14%; left: 52%;" onclick="selectBodyPart('Ear')">Ear</button>
+    <button class="body-button" style="top: 45%; left: 45%;" onclick="selectBodyPart('Hip')">Hip</button>
+    <button class="body-button" style="top: 21%; left: 40%;" onclick="selectBodyPart('Shoulder')">Shoulder</button>
+    <button class="body-button" style="top: 33%; left: 38%;" onclick="selectBodyPart('Elbow')">Elbow</button>
+    <button class="body-button" style="top: 66%; left: 43%;" onclick="selectBodyPart('Knee')">Knee</button>
+    <button class="body-button" style="top: 88%; left: 43%;" onclick="selectBodyPart('Foot')">Foot</button>    
+    <button class="body-button" style="top: 42%; left: 35%;" onclick="selectBodyPart('Arm')">Arm</button>  
+    <!-- Add buttons for other body parts -->
+    <!-- ... -->
+</div>
+{% endblock %}
+
+{% block right_panel %}
+<div id="content-area">
+    <h2>Please select a body part.</h2>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectBodyPart(bodyPart) {
+    fetch('/get_content/' + bodyPart)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('content-area').innerHTML = '<p>' + data.error + '</p>';
+        } else {
+            document.getElementById('content-area').innerHTML = data.content;
+            if (data.type === 'quiz') {
+                // Attach event listeners for quiz functionality
+                attachQuizEventListeners();
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function attachQuizEventListeners() {
+    // Function to handle quiz answer submissions
+    const options = document.querySelectorAll('.options input[type="radio"]');
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            const questionId = this.name.split('-')[1];
+            const selectedOption = this.value;
+            submitAnswer(questionId, selectedOption);
+        });
+    });
+}
+
+function submitAnswer(questionId, selectedOption) {
+    fetch('/submit_answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: questionId, selected_option: selectedOption })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messageDiv = document.getElementById('message-' + questionId);
+        messageDiv.textContent = data.message;
+        if (data.message.startsWith('Correct')) {
+            messageDiv.classList.remove('incorrect');
+            messageDiv.classList.add('correct');
+        } else {
+            messageDiv.classList.remove('correct');
+            messageDiv.classList.add('incorrect');
+        }
+        // Disable options for this question
+        const options = document.getElementsByName('option-' + questionId);
+        for (const option of options) {
+            option.disabled = true;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}

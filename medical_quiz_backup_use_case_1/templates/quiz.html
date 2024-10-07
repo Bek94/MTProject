@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .question-block {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 20px;
+        }
+        .question-text {
+            font-weight: bold;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+            color: green;
+        }
+        .message.incorrect {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Medical Quiz</h1>
+
+<div id="quiz-container">
+    {% for question in questions %}
+    <div class="question-block" id="question-block-{{ question['id'] }}">
+        <p class="question-text">{{ question['id'] }}. {{ question['question'] }}</p>
+        <div class="options">
+            <label>
+                <input type="radio" name="option-{{ question['id'] }}" value="A" onclick="submitAnswer({{ question['id'] }}, 'A')"> A. {{ question['option_a'] }}
+            </label>
+            <label>
+                <input type="radio" name="option-{{ question['id'] }}" value="B" onclick="submitAnswer({{ question['id'] }}, 'B')"> B. {{ question['option_b'] }}
+            </label>
+            <label>
+                <input type="radio" name="option-{{ question['id'] }}" value="C" onclick="submitAnswer({{ question['id'] }}, 'C')"> C. {{ question['option_c'] }}
+            </label>
+            <label>
+                <input type="radio" name="option-{{ question['id'] }}" value="D" onclick="submitAnswer({{ question['id'] }}, 'D')"> D. {{ question['option_d'] }}
+            </label>
+        </div>
+        <div class="message" id="message-{{ question['id'] }}"></div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function submitAnswer(questionId, selectedOption) {
+        fetch('/submit_answer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                question_id: questionId,
+                selected_option: selectedOption
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messageDiv = document.getElementById('message-' + questionId);
+            messageDiv.textContent = data.message;
+            if (data.message.startsWith('Correct')) {
+                messageDiv.classList.remove('incorrect');
+                messageDiv.classList.add('correct');
+            } else {
+                messageDiv.classList.remove('correct');
+                messageDiv.classList.add('incorrect');
+            }
+            // Disable options for this question
+            const options = document.getElementsByName('option-' + questionId);
+            for (const option of options) {
+                option.disabled = true;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+</body>
+</html>

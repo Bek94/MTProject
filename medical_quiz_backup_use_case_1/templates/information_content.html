@@ -1,0 +1,13 @@
+<h1>{{ body_part }}</h1>
+
+<p>{{ info['description'] }}</p>
+
+<h2>Implants Used:</h2>
+<ul>
+    {% for implant in info['implants'] %}
+        <li>{{ implant }}</li>
+    {% endfor %}
+</ul>
+
+<h2>More Information:</h2>
+<img src="{{ url_for('static', filename='qr_codes/' + body_part.lower() + '_qr.png') }}" alt="QR Code" class="qr-code">
